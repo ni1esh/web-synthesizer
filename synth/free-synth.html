@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Free Web Synthesizer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: radial-gradient(circle at top, #1e293b, #020617);
+      font-family: system-ui, sans-serif;
+      color: #e5e7eb;
+    }
+
+    .synth {
+      background: rgba(2, 6, 23, 0.85);
+      padding: 30px;
+      border-radius: 20px;
+      width: 320px;
+      box-shadow: 0 0 40px rgba(0,0,0,0.6);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #2dd4bf;
+    }
+
+    label {
+      font-size: 0.9rem;
+      color: #9ca3af;
+    }
+
+    select, input[type="range"] {
+      width: 100%;
+      margin: 8px 0 16px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #22d3ee, #a855f7);
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: black;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="synth">
+    <h2>🎹 Free Web Synth</h2>
+
+    <label>Waveform</label>
+    <select id="wave">
+      <option value="sine">Sine</option>
+      <option value="square">Square</option>
+      <option value="sawtooth">Saw</option>
+      <option value="triangle">Triangle</option>
+    </select>
+
+    <label>Frequency</label>
+    <input type="range" id="freq" min="100" max="1000" value="440">
+
+    <label>Volume</label>
+    <input type="range" id="vol" min="0" max="1" step="0.01" value="0.3">
+
+    <button id="play">Play / Stop</button>
+  </div>
+
+  <script>
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const audioCtx = new AudioContext();
+
+    let oscillator = null;
+    let gainNode = audioCtx.createGain();
+
+    document.getElementById("play").onclick = () => {
+      if (oscillator) {
+        oscillator.stop();
+        oscillator = null;
+        return;
+      }
+
+      oscillator = audioCtx.createOscillator();
+      oscillator.type = document.getElementById("wave").value;
+      oscillator.frequency.value = document.getElementById("freq").value;
+
+      gainNode.gain.value = document.getElementById("vol").value;
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+
+      oscillator.start();
+    };
+
+    document.getElementById("freq").oninput = e => {
+      if (oscillator) oscillator.frequency.value = e.target.value;
+    };
+
+    document.getElementById("vol").oninput = e => {
+      gainNode.gain.value = e.target.value;
+    };
+
+    document.getElementById("wave").onchange = e => {
+      if (oscillator) oscillator.type = e.target.value;
+    };
+  </script>
+
+</body>
+</html>
